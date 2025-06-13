@@ -1,30 +1,60 @@
-import { useState } from 'react';
-import { BillSplitter_backend } from 'declarations/BillSplitter_backend';
-
+import React, { useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { AuthClient } from "@dfinity/auth-client";
+import { createActor } from "../../declarations/BillSplitter_backend";
+import LandingPage from "./components/LandingPage";
+import Dashboard from "./components/Dashboard";
+import BillManagement from "./components/BillManagement";
+import Navbar from "./components/navbar";
+// import { useState } from "react";
 function App() {
-  const [greeting, setGreeting] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [backActor, setBackActor] = useState(null);
 
-  function handleSubmit(event) {
-    event.preventDefault();
-    const name = event.target.elements.name.value;
-    BillSplitter_backend.greet(name).then((greeting) => {
-      setGreeting(greeting);
-    });
-    return false;
+  // const nav = useNavi?gate();
+
+  const checkAuth = () => {
+    return isAuthenticated;
+  };
+
+  async function login() {
+    
+    try {
+      const authClient = await AuthClient.create();
+
+      await authClient.login({
+        identityProvider: process.env.DFX_NETWORK === "ic" ? "https://identity.ic0.app" : "http://uzt4z-lp777-77774-qaabq-cai.localhost:4943",
+        onSuccess: () => {
+          let backendActor = createActor(process.env.CANISTER_ID_BILLSPLITTER_BACKEND, {
+            actorOptions: {
+              identity: authClient.getIdentity(),
+            }
+          });
+          setBackActor(backendActor);
+          setIsAuthenticated(true); // Update authentication state
+        },
+        onError: (error) => {
+          console.log(error);
+        },
+        onNoIdentityFound: () => {
+          console.log("No identity found");
+        },
+      });
+
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   return (
-    <main>
-      <img src="/logo2.svg" alt="DFINITY logo" />
-      <br />
-      <br />
-      <form action="#" onSubmit={handleSubmit}>
-        <label htmlFor="name">Enter your name: &nbsp;</label>
-        <input id="name" alt="Name" type="text" />
-        <button type="submit">Click Me!</button>
-      </form>
-      <section id="greeting">{greeting}</section>
-    </main>
+    <Router>
+      <Navbar login={login}/>
+      <Routes>
+        
+        <Route path="/" element={checkAuth() ? <BillManagement backActor={backActor}  /> : <LandingPage login={login} />} />
+        <Route path="/login" element={checkAuth() ? <LandingPage login={login} /> : <Navigate to="/billmanagement" /> } />
+      </Routes>
+    </Router>
   );
 }
 
