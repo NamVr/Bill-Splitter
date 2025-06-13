@@ -1,0 +1,38 @@
+{
+  "canisters": {
+    "BillSplitter_backend": {
+      "candid": "src/BillSplitter_backend/BillSplitter_backend.did",
+      "package": "BillSplitter_backend",
+      "type": "rust"
+    },
+    "BillSplitter_frontend": {
+      "dependencies": [
+        "BillSplitter_backend"
+      ],
+      "source": [
+        "src/BillSplitter_frontend/dist"
+      ],
+      "type": "assets",
+      "workspace": "BillSplitter_frontend"
+    },
+    "internet_identity": {
+      "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
+      "frontend": {},
+      "remote": {
+        "id": {
+          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+        }
+      },
+      "type": "custom",
+      "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}

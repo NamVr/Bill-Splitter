@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "src/BillSplitter_backend"
+]
+resolver = "2"
